@@ -10,8 +10,22 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-navigation/native": "^6.1.9",
+    "@react-navigation/native-stack": "^6.9.17",
+    "@react-navigation/stack": "^6.3.20",
+    "@redux-saga/core": "^1.2.3",
+    "@reduxjs/toolkit": "^2.0.1",
+    "axios": "^1.6.2",
     "react": "18.2.0",
-    "react-native": "0.73.0"
+    "react-native": "0.73.0",
+    "react-native-maps": "^1.8.4",
+    "react-native-safe-area-context": "^4.8.1",
+    "react-native-screens": "^3.29.0",
+    "react-navigation": "^5.0.0",
+    "react-redux": "^9.0.4",
+    "redux-logger": "^3.0.6",
+    "redux-saga": "^1.2.3",
+    "saga": "^4.0.0-alpha"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
