@@ -5,6 +5,8 @@ import { countryName, editedCountry } from '../sagaapp/actions/action';
 import MapView, { Marker } from 'react-native-maps';
 import styles from './styles';
 import { useNavigation } from '@react-navigation/native';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { PermissionsAndroid } from 'react-native';
 
 const DetailsScreen = ({ route }) => {
     const { name, type, updatedCountry } = route.params;
@@ -13,8 +15,8 @@ const DetailsScreen = ({ route }) => {
 
     const singleCountryData = useSelector(state => state.country);
     const [singleCountryName, setsingleCountryName] = useState([])
+    const [imageSource, setImageSource] = useState();
 
-    console.log("details screen props",updatedCountry)
     useEffect(() => {
             dispatch(countryName(name,type))
     }, [])
@@ -33,6 +35,56 @@ const DetailsScreen = ({ route }) => {
     const handleEditCountry = (singleCountry) =>{
         navigation.navigate("EditScreen",{country:singleCountry})
     }
+
+    const options = {
+        mediaType: 'photo',
+        includeBase64: false,
+        maxWidth: 300,
+        maxHeight: 300,
+        cameraType: 'back'
+    };
+
+    const requestCameraPermission = async () => {
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.CAMERA,
+            {
+              title: 'Camera Permission',
+              message: 'App needs camera permission to take pictures.',
+              buttonNeutral: 'Ask Me Later',
+              buttonNegative: 'Cancel',
+              buttonPositive: 'OK',
+            },
+          );
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            openCamera();
+          } else {
+            console.log('Camera permission denied');
+          }
+        } catch (err) {
+          console.warn(err);
+        }
+      };
+
+    const openCamera = () => {
+        launchCamera(options, (response) => {
+            handleImageResponse(response);
+        });
+    };
+
+    const openImageLibrary = () => {
+        launchImageLibrary(options, (response) => {
+            handleImageResponse(response);
+        });
+    };
+
+    const handleImageResponse = (response) => {
+        if (!response.didCancel) {
+            // Update the state with the selected image
+            setImageSource(response.assets.map((item)=>item.uri));
+        }
+    };
+
     return (
         <View>
             {
@@ -42,9 +94,16 @@ const DetailsScreen = ({ route }) => {
                             <View style={{alignItems:'flex-end'}}>
                                 <TouchableOpacity onPress={()=>handleEditCountry(singleCountry)}>
                                     <Text style={styles.button}>Edit</Text>
+                                    <TouchableOpacity onPress={requestCameraPermission}>
+                                        <Text style={styles.text} >Take Photo</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity onPress={openImageLibrary}>
+                                        <Text style={styles.text}>Choose Photo</Text>
+                                    </TouchableOpacity>
                                 </TouchableOpacity>
                             </View>
-                            <Image source={{ uri: `${singleCountry.flags.png}` }} style={styles.image} />
+                            <Image source={{ uri: imageSource ? `${imageSource}` : `${singleCountry.flags.png}` }} style={styles.image} />
                             <Text style={styles.text}>Country Name: {updatedCountry ? updatedCountry.name.common : singleCountry.name.common}</Text>
                             <Text style={styles.text}>Country Population: {updatedCountry ? updatedCountry.population : singleCountry.population}</Text>
                             <Text style={styles.text}>Region: {updatedCountry ? updatedCountry.region : singleCountry.region}</Text>
